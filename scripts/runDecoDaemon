@@ -1,0 +1,48 @@
+#!/usr/bin/env python
+import sys
+import os.path
+import getopt
+
+import shiftertools
+from shiftertools.decoutils import *
+from shiftertools.prodchecks import checkDecoProd
+
+queue     = "short"
+max_qjob  = 100
+split_trg = True
+
+def shelp():
+
+    print( "\nUsage: runProdDaemon [-q QUEUE] [-m MAX_QJOBS] RUN_NUMBER ")
+    print()      
+    print( "    Launch decoder daemon for run RUN_NUMBER. Files are decoded as available.")
+    print()
+    print( "    Options: ")
+    print( "      * -q, --queue: queue to submit job [default: %s]" % queue)
+    print( "      * -m, --max_qjob: maximum numbr of jobs in queue [default: %i]" % max_qjob)
+    print( "      * -t, --split: split trigger1 and trigger2 data [default: %s]" % split_trg)
+    print()
+
+if __name__ == "__main__":
+    
+    try: opts,args=getopt.getopt(sys.argv[1:],'hq:m:t',["help","queue=","max_qjob=",'split'])
+    except getopt.GetoptError as err: error(str(err),shelp)
+    
+    for o,v in opts: 
+        if o in ('-h','--help'):
+            shelp()
+            sys.exit()
+        elif o in ('-q','--queue'   ) : queue = v
+        elif o in ('-m','--max_qjob') : max_qjob = int(v)
+        elif o in ('-t','--split'   ) : split_trg = False
+        
+    try: run = int(args[0])
+    except IndexError:  error("Wrong arguments!",shelp)
+        
+    try: 
+        decode_file_as_available(run, queue, max_qjob, split = split_trg)
+    except KeyboardInterrupt:
+        m = Messenger('runDecoDaemon')
+        m.log("Stopping decoder daemon...")
+        m.log("Checking HDF5 production...")
+        checkDecoProd(run)

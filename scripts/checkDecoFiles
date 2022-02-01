@@ -1,0 +1,37 @@
+#!/usr/bin/env python
+
+import sys,os
+import getopt
+from glob import glob
+
+import shiftertools
+from shiftertools.utils      import error,stprint
+from shiftertools.prodchecks import checkDecoProd
+
+PSCRIPT='runDecoDaemon'
+
+def shelp():
+
+    print( "\nUsage: checkProdFiles RUN_NUMBER" )
+    print() 
+    print( "Find unprocessed and corrupted hdf5 files" )
+    print()
+
+if __name__ == "__main__":
+    
+    try: opts,args=getopt.getopt(sys.argv[1:],'h',["help"])
+    except getopt.GetoptError as err: error(str(err),shelp)
+    
+    for o,v in opts: 
+        if o in ('-h','--help'):
+            shelp()
+            sys.exit()
+        else: error("Option not recognized:"%o,shelp)
+        
+    try: RUN = int(args[0])
+    except IndexError:  error("Specify RUN to be analyzed",shelp)
+    
+    shiftertools.setRawDataPaths()
+    shiftertools.setRecoedDataPaths()
+
+    checkDecoProd(RUN)
