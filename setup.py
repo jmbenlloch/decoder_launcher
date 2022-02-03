@@ -24,8 +24,7 @@ setup (
     author_email='pau.novella@ific.uv.es',
     url='http://next.ific.uv.es',
     license='NEXT',
-    scripts=['scripts/runFileDeco',
-             'scripts/runDecoDaemon',
+    scripts=['scripts/runDecoDaemon',
              'scripts/checkDecoFiles'],
     packages=packages
     )

@@ -21,8 +21,8 @@ def create_decoder_config(config_file, rawfile, hdf5file, hdf5file2=''):
 
     params = {"file_in"   : rawfile,
               "file_out"  : hdf5file,
-              "two_files" : True,
-              "no_db"     : False,
+              "two_files" : False,
+              "no_db"     : True,
               "host"      : "localhost",
               "user"      : "next",
               "pass"      : "Canfranc",
@@ -45,7 +45,7 @@ def create_decoder_job(job_file, config_file, job_name, queue, stdout_file, stde
 #PBS -q {queue}
 #PBS -o /dev/null
 #PBS -e /dev/null
-/software/rawdata/decode {config_file}  1> {stdout_file} 2> {stderr_file}
+singularity run --bind /volume0/rawdata:/volume0/rawdata --bind /volume0/analysis:/volume0/analysis /volume0/software/rawdata.sif {config_file} 1> {stdout_file} 2> {stderr_file}
 
 FILEOUT=`sed 's/,/\\n/g' {config_file} | grep '"file_out"' | cut -d':' -f 2 | cut -d'"' -f2`"
 FILEOUT2=`sed 's/,/\\n/g' {config_file} | grep '"file_out2"' | cut -d':' -f 2 | cut -d'"' -f2`"

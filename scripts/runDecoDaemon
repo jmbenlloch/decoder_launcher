@@ -3,9 +3,9 @@ import sys
 import os.path
 import getopt
 
-import shiftertools
-from shiftertools.decoutils import *
-from shiftertools.prodchecks import checkDecoProd
+from shiftertools.prodchecks import check_decoder_production
+from shiftertools.decoutils  import decode_file_as_available
+from shiftertools.utils      import Messenger
 
 queue     = "short"
 max_qjob  = 100
@@ -45,4 +45,4 @@ if __name__ == "__main__":
         m = Messenger('runDecoDaemon')
         m.log("Stopping decoder daemon...")
         m.log("Checking HDF5 production...")
-        checkDecoProd(run)
+        check_decoder_production(run)

@@ -5,17 +5,17 @@ import getopt
 from glob import glob
 
 import shiftertools
-from shiftertools.utils      import error,stprint
-from shiftertools.prodchecks import checkDecoProd
 
-PSCRIPT='runDecoDaemon'
+from shiftertools.utils      import error,stprint
+from shiftertools.prodchecks import check_deco_prod
+
 
 def shelp():
-
     print( "\nUsage: checkProdFiles RUN_NUMBER" )
     print() 
     print( "Find unprocessed and corrupted hdf5 files" )
     print()
+
 
 if __name__ == "__main__":
     
@@ -28,10 +28,7 @@ if __name__ == "__main__":
             sys.exit()
         else: error("Option not recognized:"%o,shelp)
         
-    try: RUN = int(args[0])
+    try: run = int(args[0])
     except IndexError:  error("Specify RUN to be analyzed",shelp)
     
-    shiftertools.setRawDataPaths()
-    shiftertools.setRecoedDataPaths()
-
-    checkDecoProd(RUN)
+    check_decoder_production(run)

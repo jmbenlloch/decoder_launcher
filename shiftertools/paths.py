@@ -4,12 +4,12 @@ from glob import glob
 from os   import path
 
 def rawdata_files(run):
-    path  = f'/rawdata/{run}/run_{run}.ldc*next.next-100.*.rd'
+    path  = f'/volume0/rawdata/{run}/run_{run}.ldc*next.next-100.*.rd'
     files = glob(path)
     files.sort(key = lambda f: int(f.split('.')[-2]))
     return files
 
-base_path = '/analysis/{run}/hdf5/'
+base_path = '/volume0/analysis/{run}/hdf5/'
 
 def decoder_files_path(run):
     return path.join(base_path.format(run=run), 'data')

@@ -1,34 +1,33 @@
 import os
-from glob import glob
 import re
 
-import shiftertools
-from shiftertools.utils import *
-from shiftertools.produtils import *
+from glob import glob
+
+from shiftertools.paths import rawdata_files
+from shiftertools.paths import decoder_files_path
+from shiftertools.paths import decoder_logs_path
+from shiftertools.utils import Messenger
+from shiftertools.utils import error
 
 
-def checkDecoProd(RUN):
-    
+def check_decoder_production(run):
     m = Messenger('prodchecks')
-    m.log("Checking decoder production for run",RUN)
+    m.log(f"Checking decoder production for run {run}")
 
-    rpattern = shiftertools.RAWDATAWILDCARDPATH%(RUN,RUN) # gdc1 raw files
-    #hpattern = shiftertools.HDF5DATAWILDCARDPATH%(RUN,RUN)       
-    hpattern = shiftertools.HDF5TRIGDATAWILDCARDPATH%(RUN,RUN,1) # trigger1 hdf5 files
-    lpattern = '/run_%04i_*_waveforms.h5.err'%RUN               
-    lpattern = shiftertools.LOGPATH%(RUN)+lpattern               # log files
-    rfiles = glob(rpattern)
-    hfiles = glob(hpattern)
-    lfiles = glob(lpattern)
+    raw_files = rawdata_files(run)
+    h5_files  = glob(decoder_files_path(run) + '/*h5')
+    err_files = glob(decoder_logs_path (run) + '/*err')
 
-    if not rfiles: error("No raw files found with pattern %s"%rpattern)
-    if not hfiles: error("No prod files found with pattern %s"%hpattern)
+    if not raw_files : error("No raw files found")
+    if not h5_files  : error("No prod files found")
     
-    ksort = lambda f: int(f.split('_')[2].split('.')[-1]) 
-    hfiles = sorted(hfiles, key = ksort)
-    nfiles = [ksort(f) for f in hfiles] 
+    import pdb
+    pdb.set_trace()
+    extract_raw_fnumber = lambda f: int(f.split('_')[2].split('.')[-1]) 
+    hfiles = sorted(hfiles, key = extract_raw_fnumber)
+    nfiles = [extract_raw_fnumber(f) for f in hfiles] 
     
-    ksort =  lambda f: int(f.split('.')[-2])
+    extract_raw_fnumber =  lambda f: int(f.split('.')[-2])
     rfiles = sorted(rfiles, key = ksort)
     nrfiles = [ksort(f) for f in rfiles]
         
@@ -46,24 +45,26 @@ def checkDecoProd(RUN):
     m.log("Total number of jobs with errors: %i"%len(errors))
 
     if notproc:
-        ofile = 'FilesNotProcessed_Run%i.txt'%RUN
-        f = open(ofile,'w')
-        for ifile in notproc: f.write(str(ifile)+'\n')
-        f.close()
-        m.log("Not processed files listed in: %s"%ofile)
+        fileout = f'FilesNotProcessed_Run{run}.txt'
+        with open(fileout, 'w') as fd:
+            for fnumber in notproc:
+                fd.write(f"{fnumber}\n")
+        m.log(f"Not processed files listed in: {fileout}")
     
     if errors:
-        ofile = "JobsWithErrors_Run%i.txt"%RUN
-        f = open(ofile,'w')
-        for ilog in errors: f.write(ilog+'\n')
-        f.close()
-        m.log("Logs with errors listed in: %s"%ofile)
+        fileout = f"JobsWithErrors_Run{run}.txt"
+        with open(fileout, 'w') as fd:
+            for log_index in errors:
+                fd.write(f"{log_index}\n")
+        m.log(f"Logs with errors listed in: {fileout}")
         
     # check size of files
-    ehfiles = [h for h in hfiles if os.stat(h).st_size<600000]
-    if ehfiles: 
-        m.log("Number of empty decoded files:",len(ehfiles))
-        ofile = 'RWFEmptyFiles_Run%i.txt'%RUN
-        with open(ofile,'w') as f:
-            for ifile in ehfiles: f.write(ifile.split('_')[2]+'\n')
-        m.log("empty decoded files listed in: %s"%ofile)
+    extract_h5_fnumber = lambda f: f.split('_')[2]
+    empty_h5_files = [fname for fname in h5_files if os.stat(fname).st_size < 600000]
+    if empty_h5_files: 
+        m.log("Number of empty decoded files: {}".format(len(empty_h5_files)))
+        fileout = f'RWFEmptyFiles_Run{run}.txt'
+        with open(fileout,'w') as fd:
+            for h5file in empty_h5_files:
+                fd.write('{}\n'.format(extract_h5_fnumber(h5file)))
+        m.log(f"empty decoded files listed in: {fileout}")
