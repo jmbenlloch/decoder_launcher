@@ -9,53 +9,6 @@ import magic
 from shiftertools.paths import rawdata_files
 
 
-def getRDFile(RUN,FILE): 
-    return shiftertools.RAWDATAFILEPATH%(RUN,RUN,FILE)
-
-def getRDWildCard(RUN): 
-    return shiftertools.RAWDATAWILDCARDPATH%(RUN,RUN)
-
-import pdb
-
-def getRDFiles(run_number):
-    pdb.set_trace()
-    rawdatawc = getRDWildCard(run_number)
-    return sorted(glob(rawdatawc))
-
-def getRWFWildCardFile(RUN):
-    return shiftertools.HDF5DATAWILDCARDPATH%(RUN,RUN)
-
-def getRWFTrigWildCardFile(RUN,TRIG):
-    return shiftertools.HDF5TRIGDATAWILDCARDPATH%(RUN,RUN,TRIG)
-
-def getRWFMonWildCardFile(RUN):
-    return shiftertools.WFMONWILDCARDPATH%(RUN,RUN)
-
-def getRWFFiles(RUN,TRIG=0):
-    #if TRIG: rwfc = getRWFTrigWildCardFile(RUN,TRIG)
-    #else: rwfc = getRWFWildCardFile(RUN)
-    rwfc = getRWFTrigWildCardFile(RUN,TRIG) if TRIG else getRWFWildCardFile(RUN)
-    
-    return sorted(glob(rwfc))
-
-#------------------------#
-
-def create_folders(run):
-    
-    """ Create directories for HDF5 files """
-
-    dirs = []
-    dirs.append(shiftertools.RECODATARUNPATH%run)
-    dirs.append(shiftertools.HDF5PATH%run)
-    dirs.append(shiftertools.JOBPATH%run)
-    dirs.append(shiftertools.LOGPATH%run)
-    dirs.append(shiftertools.HISTOPATH%run)
-    dirs.append(shiftertools.MAPPATH%run)
-    for d in dirs: call('mkdir -p %s'%(d),shell=True)
-
-    return 
-
-
 def execute_job(cmd, job, log = stprint):
     """ Execute job """
 
